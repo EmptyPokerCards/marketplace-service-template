@@ -91,6 +91,12 @@ async function getProxyExitIp(): Promise<string | null> {
   }
 }
 
+serviceRouter.get('/test-headers', (c) => {
+  return c.json({
+    headers: c.req.header(),
+  });
+});
+
 serviceRouter.get('/run', async (c) => {
   const walletAddress = process.env.WALLET_ADDRESS;
   if (!walletAddress) {
