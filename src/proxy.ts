@@ -51,6 +51,10 @@ function initPool(): ProxyConfig[] {
   const pass = process.env.PROXY_PASS;
 
   if (!host || !port || !user || !pass) {
+    if (process.env.MOCK_PAYMENT === 'true') {
+      proxyPool = [];
+      return [];
+    }
     throw new Error(
       'Proxy not configured. Set PROXY_LIST or PROXY_HOST/PROXY_HTTP_PORT/PROXY_USER/PROXY_PASS in .env.'
     );
@@ -72,6 +76,16 @@ function initPool(): ProxyConfig[] {
  */
 export function getProxy(): ProxyConfig {
   const pool = initPool();
+  if (pool.length === 0) {
+    return {
+      url: '',
+      host: 'localhost',
+      port: 80,
+      user: '',
+      pass: '',
+      country: 'US',
+    };
+  }
   const proxy = pool[proxyIndex % pool.length];
   proxyIndex++;
   return proxy;
@@ -113,6 +127,24 @@ export async function proxyFetch(
 
   let lastError: Error | null = null;
   const pool = initPool();
+
+  if (pool.length === 0) {
+    try {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), timeoutMs);
+
+      const response = await fetch(url, {
+        ...fetchOptions,
+        headers: { ...defaultHeaders, ...fetchOptions.headers as Record<string, string> },
+        signal: controller.signal,
+      });
+
+      clearTimeout(timeout);
+      return response;
+    } catch (err: any) {
+      throw new Error(`Direct fetch failed: ${err.message}`);
+    }
+  }
 
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
     const proxy = pool[proxyIndex % pool.length];
