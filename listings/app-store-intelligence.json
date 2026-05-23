@@ -1,0 +1,54 @@
+{
+  "id": "app-store-intelligence",
+  "name": "App Store & Google Play Store Intelligence",
+  "description": "Programmatically query top charts, search results, trending feeds, and detailed store metadata for Apple App Store and Google Play Store.",
+  "longDescription": "A robust, lightweight API for querying app charts, search, trending, and detailed metadata (rating, ratingCount, price, in-app purchases, category, size, releaseDate, icon) from Apple App Store and Google Play Store. It features optimized iTunes API batch resolutions and JSON-LD Google Play Store crawlers. Routes all request traffic through rotated mobile carrier proxies (4G/5G) and integrates the x402 payment validation flow.",
+  "endpoint": "https://api.proxies.sx/v1/x402/appstore",
+  "docsUrl": "https://agents.proxies.sx/marketplace/skill.md",
+  "pricing": {
+    "model": "per-request",
+    "amount": "0.005",
+    "minimum": "0.005",
+    "currency": "USDC",
+    "networks": [
+      {
+        "network": "solana",
+        "chainId": "solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp",
+        "recipient": "EP7UPNbNaGzFUkNHQgeqUwYBXkoWGZPS2NZGHRn2ghVk",
+        "asset": "USDC",
+        "assetAddress": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"
+      },
+      {
+        "network": "base",
+        "chainId": "eip155:8453",
+        "recipient": "0x99539fe5D7398188151DbeD869Ff1F57E70a8d46",
+        "asset": "USDC",
+        "assetAddress": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913"
+      }
+    ]
+  },
+  "category": "scraper",
+  "tags": [
+    "app-store",
+    "google-play",
+    "rank-tracking",
+    "app-marketing",
+    "aso",
+    "competitor-analysis",
+    "scraper",
+    "market-intelligence"
+  ],
+  "owner": {
+    "name": "EmptyPokerCards",
+    "github": "EmptyPokerCards"
+  },
+  "status": "active",
+  "featured": true,
+  "addedAt": "2026-05-23",
+  "x402": {
+    "discoveryUrl": "https://api.proxies.sx/v1/x402/appstore/run",
+    "wellKnown": "https://api.proxies.sx/v1/x402/appstore"
+  },
+  "lastVerified": "2026-05-23T00:00:00Z",
+  "healthEndpoint": "https://api.proxies.sx/v1/x402/health"
+}

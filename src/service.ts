@@ -29,6 +29,8 @@ import {
 } from './scrapers/linkedin-enrichment';
 import { getProfile, getPosts, analyzeProfile, analyzeImages, auditProfile } from './scrapers/instagram-scraper';
 import { searchReddit, getSubreddit, getTrending, getComments } from './scrapers/reddit-scraper';
+import { searchAppStore, lookupAppStore, getAppStoreRankings } from './scrapers/app-store';
+import { searchGooglePlay, lookupGooglePlay, getGooglePlayRankings } from './scrapers/google-play';
 
 export const serviceRouter = new Hono();
 
@@ -95,6 +97,148 @@ serviceRouter.get('/run', async (c) => {
     return c.json({ error: 'Service misconfigured: WALLET_ADDRESS not set' }, 500);
   }
 
+  // Detect App Store / Google Play Store Intelligence query
+  const store = c.req.query('store');
+  const type = c.req.query('type');
+  const isAppStoreQuery = store === 'apple' || store === 'google' || type === 'rankings' || type === 'trending';
+
+  if (isAppStoreQuery) {
+    const APP_STORE_DESCRIPTION = 'App Store & Google Play Store Intelligence API. Returns rankings, reviews, metadata, or search results.';
+    const APP_STORE_OUTPUT_SCHEMA = {
+      input: {
+        type: 'string — rankings | app | search | trending (required)',
+        store: 'string — apple | google (required)',
+        country: 'string — ISO country code (optional, default US)',
+        category: 'string — category/genre (optional, default all)',
+        appId: 'string — app bundleId or numeric id (optional)',
+        query: 'string — search term (optional)'
+      },
+      output: {
+        type: 'string',
+        store: 'string',
+        timestamp: 'string',
+        rankings: 'array',
+        metadata: 'object',
+        proxy: 'object',
+        payment: 'object'
+      }
+    };
+    const PRICE_USDC = 0.005; // $0.005 USDC
+
+    const payment = extractPayment(c);
+    if (!payment) {
+      return c.json(
+        build402Response('/api/run', APP_STORE_DESCRIPTION, PRICE_USDC, walletAddress, APP_STORE_OUTPUT_SCHEMA),
+        402,
+      );
+    }
+
+    const verification = await verifyPayment(payment, walletAddress, PRICE_USDC);
+    if (!verification.valid) {
+      return c.json({
+        error: 'Payment verification failed',
+        reason: verification.error,
+        hint: 'Ensure the transaction is confirmed and sends the correct USDC amount to the recipient wallet.',
+      }, 402);
+    }
+
+    const clientIp = c.req.header('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown';
+    if (!checkProxyRateLimit(clientIp)) {
+      c.header('Retry-After', '60');
+      return c.json({ error: 'Proxy rate limit exceeded. Max 20 requests/min to protect proxy quota.', retryAfter: 60 }, 429);
+    }
+
+    const country = (c.req.query('country') || 'US').toUpperCase();
+    const category = c.req.query('category') || 'all';
+    const appId = c.req.query('appId');
+    const queryParam = c.req.query('query');
+
+    if (!type) {
+      return c.json({ error: 'Missing parameter "type". Must be: rankings, app, search, trending' }, 400);
+    }
+    if (!store || (store !== 'apple' && store !== 'google')) {
+      return c.json({ error: 'Missing or invalid parameter "store". Must be: apple, google' }, 400);
+    }
+
+    try {
+      const proxy = getProxy();
+      let payloadData: any = null;
+
+      if (type === 'rankings') {
+        if (store === 'apple') {
+          payloadData = await getAppStoreRankings(country, category, 50);
+        } else {
+          payloadData = await getGooglePlayRankings(country, category, 30);
+        }
+      } else if (type === 'app') {
+        if (!appId) {
+          return c.json({ error: 'Missing parameter "appId" for type=app' }, 400);
+        }
+        if (store === 'apple') {
+          const details = await lookupAppStore(appId, country);
+          if (!details) return c.json({ error: 'App not found on Apple App Store' }, 404);
+          payloadData = details;
+        } else {
+          const details = await lookupGooglePlay(appId, country);
+          if (!details) return c.json({ error: 'App not found on Google Play Store' }, 404);
+          payloadData = details;
+        }
+      } else if (type === 'search') {
+        if (!queryParam) {
+          return c.json({ error: 'Missing parameter "query" for type=search' }, 400);
+        }
+        if (store === 'apple') {
+          payloadData = await searchAppStore(queryParam, country, 20);
+        } else {
+          payloadData = await searchGooglePlay(queryParam, country, 10);
+        }
+      } else if (type === 'trending') {
+        if (store === 'apple') {
+          payloadData = await getAppStoreRankings(country, 'all', 20);
+        } else {
+          payloadData = await getGooglePlayRankings(country, 'all', 20);
+        }
+      }
+
+      c.header('X-Payment-Settled', 'true');
+      c.header('X-Payment-TxHash', payment.txHash);
+
+      const responseSchema = {
+        type,
+        store,
+        category: type === 'rankings' ? category : undefined,
+        query: type === 'search' ? queryParam : undefined,
+        appId: type === 'app' ? appId : undefined,
+        country,
+        timestamp: new Date().toISOString(),
+        [type === 'app' ? 'appDetails' : type === 'search' ? 'searchResults' : type === 'trending' ? 'trendingApps' : 'rankings']: payloadData,
+        metadata: {
+          totalRanked: Array.isArray(payloadData) ? payloadData.length : 1,
+          scrapedAt: new Date().toISOString(),
+        },
+        proxy: {
+          country: proxy.country,
+          carrier: 'Mobile Carrier',
+          type: 'mobile',
+        },
+        payment: {
+          txHash: payment.txHash,
+          network: payment.network,
+          amount: verification.amount,
+          settled: true,
+        },
+      };
+
+      return c.json(responseSchema);
+    } catch (err: any) {
+      return c.json({
+        error: 'Scraping operation failed',
+        message: err.message || err,
+      }, 500);
+    }
+  }
+
+  // Fallback to Google Maps Lead Generator (original logic)
   const payment = extractPayment(c);
   if (!payment) {
     return c.json(

@@ -1,8 +1,37 @@
 {
   "version": "1.0.0",
   "updatedAt": "2026-02-15",
-  "count": 6,
+  "count": 7,
   "services": [
+    {
+      "id": "app-store-intelligence",
+      "name": "App Store & Google Play Store Intelligence",
+      "description": "Programmatically query top charts, search results, trending feeds, and detailed store metadata for Apple App Store and Google Play Store. $0.005/query via x402.",
+      "endpoint": "https://api.proxies.sx/v1/x402/appstore",
+      "docsUrl": "https://agents.proxies.sx/marketplace/skill.md",
+      "pricing": {
+        "model": "per-request",
+        "amount": "0.005",
+        "minimum": "0.005",
+        "currency": "USDC"
+      },
+      "category": "scraper",
+      "tags": [
+        "app-store",
+        "google-play",
+        "rank-tracking",
+        "aso",
+        "competitor-analysis",
+        "scraper"
+      ],
+      "owner": {
+        "name": "EmptyPokerCards",
+        "github": "EmptyPokerCards"
+      },
+      "status": "active",
+      "featured": true,
+      "detailsFile": "app-store-intelligence.json"
+    },
     {
       "id": "proxies-sx-mobile",
       "name": "Proxies.sx Mobile Proxy",
