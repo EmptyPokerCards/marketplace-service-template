@@ -133,13 +133,18 @@ serviceRouter.get('/run', async (c) => {
       );
     }
 
-    const verification = await verifyPayment(payment, walletAddress, PRICE_USDC);
-    if (!verification.valid) {
-      return c.json({
-        error: 'Payment verification failed',
-        reason: verification.error,
-        hint: 'Ensure the transaction is confirmed and sends the correct USDC amount to the recipient wallet.',
-      }, 402);
+    const isMock = process.env.MOCK_PAYMENT === 'true';
+    let verification = { valid: true, amount: PRICE_USDC };
+    if (!isMock) {
+      const realVerification = await verifyPayment(payment, walletAddress, PRICE_USDC);
+      if (!realVerification.valid) {
+        return c.json({
+          error: 'Payment verification failed',
+          reason: realVerification.error,
+          hint: 'Ensure the transaction is confirmed and sends the correct USDC amount to the recipient wallet.',
+        }, 402);
+      }
+      verification = { valid: realVerification.valid, amount: realVerification.amount };
     }
 
     const clientIp = c.req.header('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown';
