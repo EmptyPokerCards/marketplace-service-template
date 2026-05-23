@@ -94,6 +94,8 @@ async function getProxyExitIp(): Promise<string | null> {
 serviceRouter.get('/test-headers', (c) => {
   return c.json({
     headers: c.req.header(),
+    mockPaymentEnv: process.env.MOCK_PAYMENT,
+    walletAddressEnv: process.env.WALLET_ADDRESS,
   });
 });
 
