@@ -1,0 +1,23 @@
+{
+  "type": "rankings",
+  "store": "apple",
+  "category": "games",
+  "country": "US",
+  "timestamp": "2026-05-23T13:37:06.025Z",
+  "rankings": [],
+  "metadata": {
+    "totalRanked": 0,
+    "scrapedAt": "2026-05-23T13:37:06.025Z"
+  },
+  "proxy": {
+    "country": "US",
+    "carrier": "Mobile Carrier",
+    "type": "mobile"
+  },
+  "payment": {
+    "txHash": "5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp5eykt4UsFv8P8NJdTREpY1v",
+    "network": "solana",
+    "amount": 0.005,
+    "settled": true
+  }
+}

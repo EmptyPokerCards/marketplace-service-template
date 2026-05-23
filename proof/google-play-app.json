@@ -1,0 +1,35 @@
+{
+  "type": "app",
+  "store": "google",
+  "appId": "com.spotify.music",
+  "country": "US",
+  "timestamp": "2026-05-23T13:37:03.374Z",
+  "appDetails": {
+    "appName": "Spotify: Music and Podcasts",
+    "developer": "Spotify AB",
+    "appId": "com.spotify.music",
+    "rating": 4.3,
+    "ratingCount": 35632574,
+    "price": "Free",
+    "inAppPurchases": true,
+    "category": "MUSIC_AND_AUDIO",
+    "lastUpdated": "2026-05-20",
+    "size": "Varies with device",
+    "icon": "https://play-lh.googleusercontent.com/7ynvVIRdhJNAngCg_GI7i8TtH8BqkJYmffeUHsG-mJOdzt1XLvGmbsKuc5Q1SInBjDKN"
+  },
+  "metadata": {
+    "totalRanked": 1,
+    "scrapedAt": "2026-05-23T13:37:03.374Z"
+  },
+  "proxy": {
+    "country": "US",
+    "carrier": "Mobile Carrier",
+    "type": "mobile"
+  },
+  "payment": {
+    "txHash": "5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp5eykt4UsFv8P8NJdTREpY1v",
+    "network": "solana",
+    "amount": 0.005,
+    "settled": true
+  }
+}
